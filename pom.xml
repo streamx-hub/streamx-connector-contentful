@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.streamx</groupId>
+  <artifactId>streamx-contentful-connector-core</artifactId>
+  <version>3.0.17-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>StreamX Contentful : Project</name>
+
+  <modules>
+    <module>contentful-connector</module>
+  </modules>
+
+  <properties>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
+    <maven.compiler.release>21</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+    <!--  Maven plugins  -->
+    <compiler-plugin.version>3.14.1</compiler-plugin.version>
+    <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
+    <failsafe-plugin.version>${surefire-plugin.version}</failsafe-plugin.version>
+    <surefire-plugin.version>3.5.4</surefire-plugin.version>
+    <checkstyle-plugin.version>3.6.0</checkstyle-plugin.version>
+    <jacoco-plugin.version>0.8.14</jacoco-plugin.version>
+    <maven-release-plugin.version>3.3.0</maven-release-plugin.version>
+    <artifactregistry-maven-wagon.version>2.2.1</artifactregistry-maven-wagon.version>
+
+    <!--  StreamX  -->
+    <streamx.version>2.0.9</streamx.version>
+
+    <!-- CloudEvents -->
+    <cloudevents-impl.version>4.0.1</cloudevents-impl.version>
+
+    <!-- RocksDB -->
+    <rocks-db.version>9.3.1</rocks-db.version>
+
+    <!-- Quarkus -->
+    <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
+    <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
+    <quarkus.platform.version>3.31.1</quarkus.platform.version> <!-- TODO migrate to LTS, 3.33 is expected to be released in March 2026 -->
+    <quarkus-reactive-messaging-http.version>2.7.1-build20260414</quarkus-reactive-messaging-http.version>
+
+    <!--  Images tags  -->
+    <streamx.container-image.package.type.jvm>jvm</streamx.container-image.package.type.jvm>
+    <streamx.container-image.package.type.native>native</streamx.container-image.package.type.native>
+    <streamx.container-image.latest-tag>latest-${quarkus.container-image.package.type}</streamx.container-image.latest-tag>
+
+    <!--  Docker  -->
+    <quarkus.container-image.build>true</quarkus.container-image.build>
+    <quarkus.container-image.registry>ghcr.io</quarkus.container-image.registry>
+    <quarkus.container-image.group>streamx-com/streamx-contentful</quarkus.container-image.group>
+    <quarkus.container-image.name>${project.artifactId}</quarkus.container-image.name>
+    <quarkus.container-image.package.type>${streamx.container-image.package.type.jvm}</quarkus.container-image.package.type>
+    <quarkus.container-image.tag>${project.version}-${quarkus.container-image.package.type}</quarkus.container-image.tag>
+    <quarkus.container-image.additional-tags>${streamx.container-image.latest-tag}</quarkus.container-image.additional-tags>
+
+    <!-- Test dependencies -->
+    <assertj-core.version>4.0.0-M1</assertj-core.version>
+    <quarkus-wiremock-test.version>1.5.2</quarkus-wiremock-test.version>
+  </properties>
+
+  <repositories>
+    <repository>
+      <releases>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <id>streamx-maven-public-releases</id>
+      <url>https://europe-west1-maven.pkg.dev/streamx-releases/streamx-maven-public-releases</url>
+    </repository>
+  </repositories>
+  <dependencies>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-container-image-docker</artifactId>
+    </dependency>
+  </dependencies>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.streamx</groupId>
+        <artifactId>reactive-messaging-http-cloudevents</artifactId>
+        <version>${streamx.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.streamx</groupId>
+        <artifactId>content-parser</artifactId>
+        <version>${streamx.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.streamx</groupId>
+        <artifactId>cloudevents-serialization-json</artifactId>
+        <version>${streamx.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.quarkus.platform</groupId>
+        <artifactId>quarkus-bom</artifactId>
+        <version>${quarkus.platform.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.cloudevents</groupId>
+        <artifactId>cloudevents-api</artifactId>
+        <version>${cloudevents-impl.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.cloudevents</groupId>
+        <artifactId>cloudevents-core</artifactId>
+        <version>${cloudevents-impl.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.cloudevents</groupId>
+        <artifactId>cloudevents-json-jackson</artifactId>
+        <version>${cloudevents-impl.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.quarkiverse.reactivemessaging.http</groupId>
+        <artifactId>quarkus-reactive-messaging-http</artifactId>
+        <version>${quarkus-reactive-messaging-http.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.rocksdb</groupId>
+        <artifactId>rocksdbjni</artifactId>
+        <version>${rocks-db.version}</version>
+      </dependency>
+
+      <!-- Test dependencies -->
+      <dependency>
+        <groupId>org.assertj</groupId>
+        <artifactId>assertj-core</artifactId>
+        <version>${assertj-core.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.quarkiverse.wiremock</groupId>
+        <artifactId>quarkus-wiremock-test</artifactId>
+        <version>${quarkus-wiremock-test.version}</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>${quarkus.platform.group-id}</groupId>
+          <artifactId>quarkus-maven-plugin</artifactId>
+          <version>${quarkus.platform.version}</version>
+          <extensions>true</extensions>
+          <executions>
+            <execution>
+              <goals>
+                <goal>build</goal>
+                <goal>generate-code</goal>
+                <goal>generate-code-tests</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>${maven-jar-plugin.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${compiler-plugin.version}</version>
+        <configuration>
+          <compilerArgs>
+            <arg>-parameters</arg>
+          </compilerArgs>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${surefire-plugin.version}</version>
+        <configuration>
+          <systemPropertyVariables>
+            <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+            <maven.home>${maven.home}</maven.home>
+            <maven.repo>${settings.localRepository}</maven.repo>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>${failsafe-plugin.version}</version>
+        <configuration>
+          <systemPropertyVariables>
+            <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+            <maven.home>${maven.home}</maven.home>
+          </systemPropertyVariables>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>prepare-agent</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>generate-report</id>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>perform-coverage-check</id>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <rule>
+                  <element>BUNDLE</element>
+                  <limits>
+                    <limit>
+                      <counter>INSTRUCTION</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>90%</minimum>
+                    </limit>
+                  </limits>
+                </rule>
+              </rules>
+            </configuration>
+          </execution>
+          <execution>
+            <id>perform-complexity-check</id>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <rule>
+                  <element>CLASS</element>
+                  <limits>
+                    <limit>
+                      <counter>COMPLEXITY</counter>
+                      <value>TOTALCOUNT</value>
+                      <maximum>25</maximum>
+                    </limit>
+                  </limits>
+                </rule>
+                <rule>
+                  <element>METHOD</element>
+                  <limits>
+                    <limit>
+                      <counter>COMPLEXITY</counter>
+                      <value>TOTALCOUNT</value>
+                      <maximum>5</maximum>
+                    </limit>
+                  </limits>
+                </rule>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>${maven-release-plugin.version}</version>
+        <configuration>
+          <tagNameFormat>@{project.version}</tagNameFormat>
+          <scmCommentPrefix>[no ci] [maven-release-plugin]</scmCommentPrefix>
+        </configuration>
+      </plugin>
+    </plugins>
+    <extensions>
+      <extension>
+        <groupId>com.google.cloud.artifactregistry</groupId>
+        <artifactId>artifactregistry-maven-wagon</artifactId>
+        <version>${artifactregistry-maven-wagon.version}</version>
+      </extension>
+    </extensions>
+  </build>
+</project>
