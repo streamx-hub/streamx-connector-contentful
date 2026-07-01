@@ -35,9 +35,6 @@
     <!-- CloudEvents -->
     <cloudevents-impl.version>4.0.1</cloudevents-impl.version>
 
-    <!-- RocksDB -->
-    <rocks-db.version>9.3.1</rocks-db.version>
-
     <!-- Quarkus -->
     <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
     <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
@@ -60,8 +57,14 @@
 
     <!-- Test dependencies -->
     <assertj-core.version>4.0.0-M1</assertj-core.version>
-    <quarkus-wiremock-test.version>1.5.2</quarkus-wiremock-test.version>
   </properties>
+
+  <distributionManagement>
+    <repository>
+      <id>streamx-maven-public-releases</id>
+      <url>artifactregistry://europe-west1-maven.pkg.dev/streamx-releases/streamx-maven-public-releases</url>
+    </repository>
+  </distributionManagement>
 
   <repositories>
     <repository>
@@ -86,16 +89,6 @@
       <dependency>
         <groupId>com.streamx</groupId>
         <artifactId>reactive-messaging-http-cloudevents</artifactId>
-        <version>${streamx.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.streamx</groupId>
-        <artifactId>content-parser</artifactId>
-        <version>${streamx.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.streamx</groupId>
-        <artifactId>cloudevents-serialization-json</artifactId>
         <version>${streamx.version}</version>
       </dependency>
       <dependency>
@@ -125,23 +118,12 @@
         <artifactId>quarkus-reactive-messaging-http</artifactId>
         <version>${quarkus-reactive-messaging-http.version}</version>
       </dependency>
-      <dependency>
-        <groupId>org.rocksdb</groupId>
-        <artifactId>rocksdbjni</artifactId>
-        <version>${rocks-db.version}</version>
-      </dependency>
 
       <!-- Test dependencies -->
       <dependency>
         <groupId>org.assertj</groupId>
         <artifactId>assertj-core</artifactId>
         <version>${assertj-core.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>io.quarkiverse.wiremock</groupId>
-        <artifactId>quarkus-wiremock-test</artifactId>
-        <version>${quarkus-wiremock-test.version}</version>
         <scope>test</scope>
       </dependency>
     </dependencies>

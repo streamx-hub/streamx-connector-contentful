@@ -23,10 +23,8 @@ public interface Configuration {
   @WithDefault("10")
   int includeLevel();
 
-  @WithDefault("https://cdn.contentful.com/spaces/{spaceId}/environments/{environment}/assets")
   String contentfulAssetsUrl();
 
-  @WithDefault("https://cdn.contentful.com/spaces/{spaceId}/environments/{environment}/entries")
   String contentfulEntriesUrl();
 
   @WithDefault("1")

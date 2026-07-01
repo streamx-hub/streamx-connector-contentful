@@ -41,13 +41,9 @@ public class ContentfulAssetResolver {
 
   @PostConstruct
   void init() {
-    String spaceId = configuration.spaceId();
-    String environment = configuration.environment();
-    token = configuration.token();
 
-    baseUrl = configuration.contentfulAssetsUrl()
-        .replace("{spaceId}", spaceId)
-        .replace("{environment}", environment);
+    token = configuration.token();
+    baseUrl = configuration.contentfulAssetsUrl();
 
     retryPolicy = new RetryPolicy(
         Duration.ofSeconds(configuration.resolveAssetRequestBackoffInitialSeconds()),

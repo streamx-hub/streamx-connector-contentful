@@ -16,8 +16,11 @@ import org.jboss.logging.Logger;
 @ApplicationScoped
 public class ContentfulWebClient {
 
-  @Inject WebClient webClient;
-  @Inject Logger log;
+  @Inject
+  WebClient webClient;
+
+  @Inject
+  Logger log;
 
   public Uni<HttpResponse<Buffer>> get(
       String url,

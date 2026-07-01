@@ -3,11 +3,10 @@ package com.streamx.contentful.connector.resolvers.management;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.streamx.contentful.connector.client.ContentfulWebClient;
+import com.streamx.contentful.connector.client.ContentfulWebClient.RetryPolicy;
 import com.streamx.contentful.connector.configuration.Configuration;
 import com.streamx.contentful.connector.utils.ContentfulConstants;
 import com.streamx.contentful.connector.utils.ContentfulJsonUtils;
-import com.streamx.contentful.connector.client.ContentfulWebClient.RetryPolicy;
-import com.streamx.contentful.connector.resolvers.delivery.ContentfulIncludesParser;
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.core.buffer.Buffer;
 import io.vertx.mutiny.ext.web.client.HttpResponse;
@@ -18,19 +17,12 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class ContentfulEntryResolver {
 
   @Inject
-  Logger log;
-
-  @Inject
   ContentfulWebClient contentfulWebClient;
-
-  @Inject
-  ContentfulIncludesParser includesParser;
 
   @Inject
   ObjectMapper objectMapper;
@@ -46,13 +38,9 @@ public class ContentfulEntryResolver {
   @PostConstruct
   void init() {
 
-    String spaceId = configuration.spaceId();
-    String environment = configuration.environment();
     token = configuration.token();
     includeLevel = configuration.includeLevel();
-    baseUrl = configuration.contentfulEntriesUrl()
-        .replace("{spaceId}", spaceId)
-        .replace("{environment}", environment);
+    baseUrl = configuration.contentfulEntriesUrl();
     retryPolicy = new RetryPolicy(
         Duration.ofSeconds(configuration.resolveAssetRequestBackoffInitialSeconds()),
         Duration.ofSeconds(configuration.resolveAssetRequestBackoffMaxWaitSeconds()),
@@ -93,8 +81,10 @@ public class ContentfulEntryResolver {
 
     JsonNode includes = root.path("includes");
 
-    ContentfulJsonUtils.forEachItem(includes.path("Entry"), entries::put);
-    ContentfulJsonUtils.forEachItem(includes.path("Asset"), assets::put);
+    ContentfulJsonUtils.forEachItem(includes.path(ContentfulConstants.FIELD_VALUE_ENTRY),
+        entries::put);
+    ContentfulJsonUtils.forEachItem(includes.path(ContentfulConstants.FIELD_VALUE_ASSET),
+        assets::put);
 
     return new ResolvedContentfulLinks(entries, assets);
   }

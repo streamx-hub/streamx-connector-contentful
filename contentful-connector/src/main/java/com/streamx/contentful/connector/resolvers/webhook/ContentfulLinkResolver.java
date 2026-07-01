@@ -6,6 +6,7 @@ import com.streamx.contentful.connector.resolvers.ContentfulDataCompletionStrate
 import com.streamx.contentful.connector.resolvers.management.ContentfulAssetResolver;
 import com.streamx.contentful.connector.resolvers.management.ContentfulEntryResolver;
 import com.streamx.contentful.connector.resolvers.management.ResolvedContentfulLinks;
+import io.quarkus.arc.lookup.LookupIfProperty;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -17,6 +18,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.jboss.logging.Logger;
 
 @ApplicationScoped
+@LookupIfProperty(
+    name = "streamx.contentful.connector.use-content-delivery-api",
+    stringValue = "false"
+)
 public class ContentfulLinkResolver implements ContentfulDataCompletionStrategy {
 
   @Inject

@@ -10,27 +10,32 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.streamx.contentful.connector.InMemoryMessagingTestResource;
 import com.streamx.contentful.connector.client.ContentfulWebClient;
-import com.streamx.contentful.connector.configuration.Configuration;
+import io.quarkus.test.InjectMock;
+import io.quarkus.test.common.QuarkusTestResource;
+import io.quarkus.test.junit.QuarkusTest;
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.core.buffer.Buffer;
 import io.vertx.mutiny.ext.web.client.HttpResponse;
+import jakarta.inject.Inject;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import org.jboss.logging.Logger;
 import org.junit.jupiter.api.Test;
 
+@QuarkusTest
+@QuarkusTestResource(InMemoryMessagingTestResource.class)
 class ContentfulAssetResolverTest {
 
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  @Inject
+  ContentfulAssetResolver resolver;
+
+  @InjectMock
+  ContentfulWebClient contentfulWebClient;
 
   @Test
   void returnsNoAssetsWhenThereAreNoLinksToResolve() {
-    ContentfulWebClient contentfulWebClient = mock(ContentfulWebClient.class);
-    ContentfulAssetResolver resolver = resolver(contentfulWebClient);
-
     assertThat(resolver.resolve(null).await().indefinitely()).isEmpty();
     assertThat(resolver.resolve(Set.of()).await().indefinitely()).isEmpty();
     verify(contentfulWebClient, never()).get(any(), any(), any(), any(), any());
@@ -38,7 +43,6 @@ class ContentfulAssetResolverTest {
 
   @Test
   void fetchesAssetsByIdAndReturnsThemIndexedByContentfulId() {
-    ContentfulWebClient contentfulWebClient = mock(ContentfulWebClient.class);
     HttpResponse<Buffer> response = response("""
         {
           "items": [
@@ -61,7 +65,7 @@ class ContentfulAssetResolverTest {
         eq("ContentfulAssetResolver")))
         .thenReturn(Uni.createFrom().item(response));
 
-    Map<String, JsonNode> assets = resolver(contentfulWebClient)
+    Map<String, JsonNode> assets = resolver
         .resolve(new LinkedHashSet<>(java.util.List.of("asset-1", "asset-2")))
         .await().indefinitely();
 
@@ -72,12 +76,11 @@ class ContentfulAssetResolverTest {
 
   @Test
   void returnsNoAssetsWhenContentfulResponseDoesNotContainItemsArray() {
-    ContentfulWebClient contentfulWebClient = mock(ContentfulWebClient.class);
     HttpResponse<Buffer> response = response("{\"items\": {}}");
     when(contentfulWebClient.get(any(), any(), any(), any(), any()))
         .thenReturn(Uni.createFrom().item(response));
 
-    Map<String, JsonNode> assets = resolver(contentfulWebClient)
+    Map<String, JsonNode> assets = resolver
         .resolve(Set.of("asset-1"))
         .await().indefinitely();
 
@@ -86,39 +89,15 @@ class ContentfulAssetResolverTest {
 
   @Test
   void reportsInvalidContentfulAssetResponse() {
-    ContentfulWebClient contentfulWebClient = mock(ContentfulWebClient.class);
     HttpResponse<Buffer> response = response("{invalid-json");
     when(contentfulWebClient.get(any(), any(), any(), any(), any()))
         .thenReturn(Uni.createFrom().item(response));
 
-    assertThatThrownBy(() -> resolver(contentfulWebClient)
+    assertThatThrownBy(() -> resolver
         .resolve(Set.of("asset-1"))
         .await().indefinitely())
         .isInstanceOf(RuntimeException.class)
         .hasMessageContaining("Failed to parse Contentful assets response");
-  }
-
-  private static ContentfulAssetResolver resolver(ContentfulWebClient contentfulWebClient) {
-    ContentfulAssetResolver resolver = new ContentfulAssetResolver();
-    resolver.log = Logger.getLogger(ContentfulAssetResolver.class);
-    resolver.contentfulWebClient = contentfulWebClient;
-    resolver.objectMapper = OBJECT_MAPPER;
-    resolver.configuration = configuration();
-    resolver.init();
-    return resolver;
-  }
-
-  private static Configuration configuration() {
-    Configuration configuration = mock(Configuration.class);
-    when(configuration.spaceId()).thenReturn("space-1");
-    when(configuration.environment()).thenReturn("master");
-    when(configuration.token()).thenReturn("token");
-    when(configuration.contentfulAssetsUrl())
-        .thenReturn("https://cdn.contentful.com/spaces/{spaceId}/environments/{environment}/assets");
-    when(configuration.resolveAssetRequestBackoffInitialSeconds()).thenReturn(1);
-    when(configuration.resolveAssetRequestBackoffMaxWaitSeconds()).thenReturn(10);
-    when(configuration.resolveAssetRequestBackoffMaxRetries()).thenReturn(3);
-    return configuration;
   }
 
   private static HttpResponse<Buffer> response(String body) {

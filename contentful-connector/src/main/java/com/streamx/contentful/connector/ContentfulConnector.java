@@ -4,13 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.streamx.contentful.connector.configuration.Configuration;
 import com.streamx.contentful.connector.data.Data;
-import com.streamx.contentful.connector.resolvers.ContentfulPayloadResolver;
+import com.streamx.contentful.connector.resolvers.ContentfulDataCompletionStrategy;
 import com.streamx.contentful.connector.services.ContentfulService;
 import com.streamx.contentful.connector.utils.CloudEventUtils;
 import io.cloudevents.CloudEvent;
 import io.quarkus.reactivemessaging.http.runtime.IncomingHttpMetadata;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.eclipse.microprofile.reactive.messaging.Outgoing;
@@ -28,7 +29,7 @@ public class ContentfulConnector {
   ContentfulService contentfulService;
 
   @Inject
-  ContentfulPayloadResolver contentfulPayloadResolver;
+  Instance<ContentfulDataCompletionStrategy> contentfulPayloadResolver;
 
   @Inject
   Configuration configuration;
@@ -38,13 +39,13 @@ public class ContentfulConnector {
   public Uni<CloudEvent> processMessage(String requestBody, IncomingHttpMetadata metadata) {
 
     return getWebhookDataFromRequest(requestBody, metadata)
-            .chain(this::completeWebhookData)
-            .map(this::createStreamxCloudEvent)
-            .onFailure().invoke(this::logProcessingFailure);
+        .chain(this::completeWebhookData)
+        .map(this::createStreamxCloudEvent)
+        .onFailure().invoke(this::logProcessingFailure);
   }
 
   private Uni<ContentfulWebhookData> getWebhookDataFromRequest(String requestBody,
-                                                               IncomingHttpMetadata metadata) {
+      IncomingHttpMetadata metadata) {
     return Uni.createFrom().item(() -> {
       try {
         JsonNode webhookPayload = contentfulService.getWebhookPayload(requestBody);
@@ -61,7 +62,7 @@ public class ContentfulConnector {
 
   private Uni<ContentfulWebhookData> completeWebhookData(ContentfulWebhookData webhookData) {
     log.tracef("Filling webhook data <%s>", webhookData);
-    return contentfulPayloadResolver.getCompleteDataFor(webhookData.rawData())
+    return contentfulPayloadResolver.get().getCompleteDataFor(webhookData.rawData())
         .map(webhookData::withRawData);
   }
 

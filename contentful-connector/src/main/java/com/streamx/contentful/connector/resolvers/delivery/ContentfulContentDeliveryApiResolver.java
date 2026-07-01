@@ -10,6 +10,7 @@ import com.streamx.contentful.connector.client.ContentfulWebClient;
 import com.streamx.contentful.connector.client.ContentfulWebClient.RetryPolicy;
 import com.streamx.contentful.connector.utils.ContentfulJsonUtils;
 import com.streamx.contentful.connector.resolvers.ContentfulDataCompletionStrategy;
+import io.quarkus.arc.lookup.LookupIfProperty;
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.core.buffer.Buffer;
 import io.vertx.mutiny.ext.web.client.HttpResponse;
@@ -24,6 +25,10 @@ import java.util.Set;
 import org.jboss.logging.Logger;
 
 @ApplicationScoped
+@LookupIfProperty(
+    name = "streamx.contentful.connector.use-content-delivery-api",
+    stringValue = "true"
+)
 public class ContentfulContentDeliveryApiResolver implements ContentfulDataCompletionStrategy {
 
   @Inject
@@ -45,14 +50,9 @@ public class ContentfulContentDeliveryApiResolver implements ContentfulDataCompl
 
   @PostConstruct
   void init() {
-
-    String spaceId = configuration.spaceId();
-    String environment = configuration.environment();
     token = configuration.token();
     includeLevel = configuration.includeLevel();
-    baseUrl = configuration.contentfulEntriesUrl()
-        .replace("{spaceId}", spaceId)
-        .replace("{environment}", environment);
+    baseUrl = configuration.contentfulEntriesUrl();
     retryPolicy = new RetryPolicy(
         Duration.ofSeconds(configuration.resolveAssetRequestBackoffInitialSeconds()),
         Duration.ofSeconds(configuration.resolveAssetRequestBackoffMaxWaitSeconds()),
@@ -111,8 +111,8 @@ public class ContentfulContentDeliveryApiResolver implements ContentfulDataCompl
       return map;
     }
 
-    ContentfulJsonUtils.forEachItem(includes.path("Entry"), map::put);
-    ContentfulJsonUtils.forEachItem(includes.path("Asset"), map::put);
+    ContentfulJsonUtils.forEachItem(includes.path(ContentfulConstants.FIELD_VALUE_ENTRY), map::put);
+    ContentfulJsonUtils.forEachItem(includes.path(ContentfulConstants.FIELD_VALUE_ASSET), map::put);
 
     return map;
   }
