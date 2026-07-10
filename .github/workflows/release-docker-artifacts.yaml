@@ -43,12 +43,12 @@ jobs:
           cache: 'maven'
 
       - name: Release verify
-        run: ./mvnw -B verify
+        run: ./mvnw -B verify -f contentful-connector/pom.xml
 
       - name: Release prepare
-        run: ./mvnw -B release:prepare -Darguments="-DskipTests"
+        run: ./mvnw -B release:prepare -Darguments="-DskipTests" -f contentful-connector/pom.xml
 
       - name: Release perform
         run: |
           ./mvnw -B release:perform -P container-image-multiplatform,release \
-            -Darguments="-DskipTests -Dquarkus.container-image.push=true"
+            -Darguments="-DskipTests -Dquarkus.container-image.push=true" -f contentful-connector/pom.xml
