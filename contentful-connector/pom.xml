@@ -70,6 +70,11 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>io.rest-assured</groupId>
+      <artifactId>rest-assured</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>io.smallrye.reactive</groupId>
       <artifactId>smallrye-reactive-messaging-in-memory</artifactId>
       <scope>test</scope>
@@ -114,6 +119,21 @@
       <id>container-image-multiplatform</id>
       <properties>
         <quarkus.docker.buildx.platform>linux/amd64,linux/arm64</quarkus.docker.buildx.platform>
+      </properties>
+    </profile>
+    <profile>
+      <id>disable-native-container-build</id>
+      <activation>
+        <property>
+          <name>native</name>
+        </property>
+        <os>
+          <family>unix</family>
+          <name>Linux</name>
+        </os>
+      </activation>
+      <properties>
+        <quarkus.native.container-build>false</quarkus.native.container-build>
       </properties>
     </profile>
   </profiles>

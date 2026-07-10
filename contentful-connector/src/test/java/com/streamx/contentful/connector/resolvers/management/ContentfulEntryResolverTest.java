@@ -24,7 +24,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 @QuarkusTest
-@QuarkusTestResource(InMemoryMessagingTestResource.class)
+@QuarkusTestResource(value = InMemoryMessagingTestResource.class, restrictToAnnotatedClass = true)
 class ContentfulEntryResolverTest {
 
   @Inject

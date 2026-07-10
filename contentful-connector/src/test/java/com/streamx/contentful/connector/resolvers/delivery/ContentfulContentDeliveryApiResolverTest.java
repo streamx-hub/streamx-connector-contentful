@@ -21,7 +21,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 @QuarkusTest
-@QuarkusTestResource(InMemoryMessagingTestResource.class)
+@QuarkusTestResource(value = InMemoryMessagingTestResource.class, restrictToAnnotatedClass = true)
 class ContentfulContentDeliveryApiResolverTest {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
