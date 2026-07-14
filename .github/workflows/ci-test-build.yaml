@@ -26,4 +26,4 @@ jobs:
 
       - name: Build project
         run: |
-          ./mvnw clean install -f contentful-connector/pom.xml
+          ./mvnw clean install

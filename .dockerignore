@@ -1,4 +1,4 @@
-services/processing/contentful-connector/src
+src
 !target/*-runner
 !target/*-runner.jar
 !target/lib/*
