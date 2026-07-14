@@ -57,6 +57,13 @@
     <assertj-core.version>4.0.0-M1</assertj-core.version>
   </properties>
 
+  <scm>
+    <connection>scm:git:git@github.com:streamx-hub/streamx-connector-contentful.git</connection>
+    <developerConnection>scm:git:git@github.com:streamx-hub/streamx-connector-contentful.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://github.com/streamx-hub/streamx-connector-contentful</url>
+  </scm>
+
   <distributionManagement>
     <repository>
       <id>streamx-maven-public-releases</id>
